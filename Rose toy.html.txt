@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Rose Toy Preorder</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #fdf3f6;
+    display: flex;
+    justify-content: center;
+    padding-top: 40px;
+}
+.box {
+    background: white;
+    padding: 25px;
+    width: 360px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    text-align: center;
+}
+h1 { color: #b23a48; }
+input, button {
+    width: 100%;
+    padding: 10px;
+    margin: 6px 0;
+}
+button {
+    background: #b23a48;
+    color: white;
+    border: none;
+}
+.admin { display:none; text-align:left; }
+ul { font-size:13px; padding-left:18px; }
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<h1>Rose Toy</h1>
+<p>Elegant • Discreet • 18+</p>
+
+<input id="name" placeholder="Your Name">
+<input id="email" placeholder="Your Email">
+<button onclick="save()">Reserve Yours</button>
+
+<hr>
+
+<h3>Admin Login</h3>
+<input id="pass" placeholder="Password">
+<button onclick="login()">Login</button>
+
+<div class="admin" id="admin">
+<h3>Preorders</h3>
+<ul id="list"></ul>
+</div>
+</div>
+
+<script>
+// 🔐 CHANGE PASSWORD
+const ADMIN_PASSWORD = "admin123";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAHhGvyE9DbIm7fpuRlLvFkO5vPY5f8jAg",
+  authDomain: "rose-toy-preorder.firebaseapp.com",
+  projectId: "rose-toy-preorder",
+  storageBucket: "rose-toy-preorder.firebasestorage.app",
+  messagingSenderId: "616163884038",
+  appId: "1:616163884038:web:cade443fce38f9f7a51787",
+  measurementId: "G-Z3BFHVEPEC"
+};
+
+// INIT FIREBASE
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+function save() {
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    if (!name || !email) return alert("Enter name and email");
+
+    db.collection("preorders").add({
+        name,
+        email,
+        time: new Date()
+    });
+
+    alert("Preorder saved!");
+    document.getElementById("name").value = "";
+    document.getElementById("email").value = "";
+}
+
+// 🔑 ADMIN LOGIN
+function login() {
+    if (document.getElementById("pass").value !== ADMIN_PASSWORD)
+        return alert("Wrong password");
+
+    document.getElementById("admin").style.display = "block";
+    load();
+}
+
+// 📋 LOAD PREORDERS
+function load() {
+    db.collection("preorders").orderBy("time")
+      .onSnapshot(snapshot => {
+        const list = document.getElementById("list");
+        list.innerHTML = "";
+        snapshot.forEach(doc => {
+            const p = doc.data();
+            const li = document.createElement("li");
+            li.textContent = `${p.name} — ${p.email}`;
+            list.appendChild(li);
+        });
+    });
+}
+</script>
+
+</body>
+</html>
